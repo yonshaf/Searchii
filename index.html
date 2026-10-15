@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Searchii - AI Job Finder powered by TinyFish API</title>
+  <meta name="description" content="Aggregate and find jobs across LinkedIn, Y Combinator, Greenhouse, Lever, Ashby, and RemoteOK using autonomous TinyFish AI web scraping and search.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Glowing Background Orbs -->
+  <div class="bg-mesh">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+          </svg>
+          <div class="pulse-ring"></div>
+        </div>
+        <div class="brand-text">
+          <h1>Searchii <span class="badge-brand">AI</span></h1>
+          <p class="brand-sub">Powered by TinyFish Web Agents</p>
+        </div>
+      </div>
+
+      <!-- Supported Platforms Scroller -->
+      <div class="platform-strip">
+        <span class="platform-label">Targeting:</span>
+        <span class="chip-platform active" data-platform="all">All Sources</span>
+        <span class="chip-platform" data-platform="ycombinator">YC Startup Jobs</span>
+        <span class="chip-platform" data-platform="linkedin">LinkedIn</span>
+        <span class="chip-platform" data-platform="greenhouse">Greenhouse</span>
+        <span class="chip-platform" data-platform="lever">Lever</span>
+        <span class="chip-platform" data-platform="ashby">Ashby</span>
+        <span class="chip-platform" data-platform="remoteok">RemoteOK</span>
+        <span class="chip-platform" data-platform="wellfound">Wellfound</span>
+      </div>
+
+      <!-- Header Controls -->
+      <div class="header-actions">
+        <div class="api-status-pill" id="apiStatusPill" title="TinyFish API Connected">
+          <span class="status-dot green"></span>
+          <span class="status-text">TinyFish Active</span>
+        </div>
+        <button class="btn btn-ghost" id="resumeBtn" title="Resume Match & Hiring Probability">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span class="btn-text">Resume Match</span>
+          <span class="badge-count badge-resume" id="resumeStatusBadge">Active</span>
+        </button>
+        <button class="btn btn-ghost" id="savedJobsBtn" title="Saved Bookmarks">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="btn-text">Saved</span>
+          <span class="badge-count" id="savedCountBadge">0</span>
+        </button>
+        <button class="btn btn-ghost" id="settingsBtn" title="API Settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="btn-text">Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="main-layout">
+    <!-- Hero / Discovery Dashboard -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <span class="sparkle">✨</span> Autonomous AI Cross-Platform Aggregator
+      </div>
+      <h2 class="hero-title">Find High-Impact Jobs Across Any Platform</h2>
+      <p class="hero-desc">
+        TinyFish AI navigates company career pages, ATS platforms (Greenhouse, Lever, Ashby), Y Combinator, and LinkedIn to extract fresh, verified listings in seconds.
+      </p>
+
+      <!-- Search Console Box -->
+      <div class="search-console-card">
+        <!-- Mode Tabs -->
+        <div class="console-modes">
+          <button class="mode-tab active" data-mode="search" id="tabSearchMode">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Fast Multi-Platform Search</span>
+            <span class="tab-chip">TinyFish Search API</span>
+          </button>
+          <button class="mode-tab" data-mode="agent" id="tabAgentMode">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m14 9 3 3-3 3"></path></svg>
+            <span>Autonomous Web Agent</span>
+            <span class="tab-chip agent-chip">TinyFish Agent API</span>
+          </button>
+          <button class="mode-tab" data-mode="target" id="tabTargetMode">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
+            <span>Scrape Specific Career URL</span>
+            <span class="tab-chip direct-chip">Live Crawler</span>
+          </button>
+        </div>
+
+        <!-- Mode 1 & 2 Inputs: Role + Location + Platform -->
+        <form id="searchForm" class="search-inputs-form">
+          <div class="search-input-group keyword-group">
+            <label for="searchQuery" class="input-label">Job Title or Keyword</label>
+            <div class="input-with-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="searchQuery" placeholder="e.g. Senior Frontend Engineer, AI Researcher, Product Designer..." value="Senior Frontend Engineer" autocomplete="off" required>
+            </div>
+          </div>
+
+          <div class="search-input-group location-group" id="locationGroup">
+            <label for="searchLocation" class="input-label">Location / Work Style</label>
+            <div class="input-with-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <input type="text" id="searchLocation" placeholder="e.g. Remote, San Francisco, London..." value="Remote">
+            </div>
+          </div>
+
+          <!-- Mode 3 Input: Direct URL (Hidden by default) -->
+          <div class="search-input-group url-group" id="urlGroup" style="display: none;">
+            <label for="targetUrl" class="input-label">Target Career Page / Job Board URL</label>
+            <div class="input-with-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              <input type="url" id="targetUrl" placeholder="https://news.ycombinator.com/jobs or https://jobs.lever.co/company" value="https://news.ycombinator.com/jobs">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="search-action-group">
+            <button type="submit" class="btn btn-primary" id="executeSearchBtn">
+              <span class="btn-spinner" id="btnSpinner"></span>
+              <svg id="btnSearchIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="8"/></svg>
+              <span id="btnSearchText">Dispatch AI Search</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick Filters Bar -->
+        <div class="filters-row">
+          <div class="quick-tags">
+            <span class="filter-tag-title">Quick Picks:</span>
+            <button type="button" class="tag-pill" data-fill="Full Stack Engineer">Full Stack</button>
+            <button type="button" class="tag-pill" data-fill="Machine Learning Engineer">ML / AI</button>
+            <button type="button" class="tag-pill" data-fill="Product Designer">Product Design</button>
+            <button type="button" class="tag-pill" data-fill="DevOps Platform Engineer">DevOps</button>
+            <button type="button" class="tag-pill" data-fill="Engineering Manager">Eng Manager</button>
+          </div>
+
+          <div class="filters-secondary">
+            <label class="toggle-control" title="Show only remote positions">
+              <input type="checkbox" id="remoteOnlyToggle" checked>
+              <span class="toggle-switch"></span>
+              <span class="toggle-text">Remote Only</span>
+            </label>
+            <div class="select-wrapper">
+              <select id="experienceFilter">
+                <option value="all">All Experience Levels</option>
+                <option value="entry">Entry / Junior</option>
+                <option value="mid">Mid Level</option>
+                <option value="senior" selected>Senior Level</option>
+                <option value="lead">Lead / Staff / Principal</option>
+              </select>
+            </div>
+            <div class="select-wrapper">
+              <select id="sortBySelect">
+                <option value="match" selected>Sort: Highest Resume Match %</option>
+                <option value="recent">Sort: Most Recent</option>
+                <option value="salary">Sort: Highest Salary</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- Main Results Section -->
+    <section class="results-section">
+      <!-- Results Toolbar -->
+      <div class="results-toolbar">
+        <div class="results-count-wrapper">
+          <h3 class="results-heading" id="resultsHeading">Job Opportunities</h3>
+          <span class="results-count-badge" id="resultsCount">0 found</span>
+          <span class="results-subtext" id="resultsSubtext">Across active web platforms</span>
+        </div>
+
+        <div class="toolbar-actions">
+          <!-- View Toggle -->
+          <div class="view-toggle">
+            <button class="toggle-btn active" id="viewGridBtn" title="Grid View">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+            <button class="toggle-btn" id="viewListBtn" title="Compact List View">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <!-- Export dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-secondary" id="exportDropdownBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Export</span>
+            </button>
+            <div class="dropdown-menu" id="exportMenu">
+              <button class="dropdown-item" id="exportJsonBtn">Download JSON</button>
+              <button class="dropdown-item" id="exportCsvBtn">Download CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job Cards Container -->
+      <div class="jobs-grid" id="jobsContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+        </div>
+        <h4>No jobs matched your current criteria</h4>
+        <p>Try widening your search keywords, location filters, or clicking "All Sources" to crawl more platforms.</p>
+        <button class="btn btn-secondary" id="resetFiltersBtn">Reset Search & Filters</button>
+      </div>
+
+      <!-- Loading State Skeleton -->
+      <div class="skeleton-grid" id="skeletonGrid" style="display: none;">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Job Details Modal / Drawer -->
+  <div class="modal-backdrop" id="jobModalBackdrop" style="display: none;">
+    <div class="modal-content drawer-style" id="jobDrawer">
+      <div class="modal-header">
+        <div class="modal-brand-badge" id="modalCompanyLogo">YC</div>
+        <div class="modal-title-wrap">
+          <h2 id="modalJobTitle">Staff Infrastructure Engineer</h2>
+          <div class="modal-meta-row">
+            <span class="company-name" id="modalCompanyName">PostEra</span>
+            <span class="bullet">•</span>
+            <span class="platform-origin" id="modalPlatformOrigin">YC Lever Board</span>
+            <span class="bullet">•</span>
+            <span class="location" id="modalLocation">Remote, US</span>
+          </div>
+        </div>
+        <button class="btn-close" id="closeJobModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- AI Resume Match & Hiring Probability Hero Section -->
+        <div class="resume-match-card" id="modalResumeMatchSection">
+          <div class="match-card-top">
+            <div class="match-gauge-wrap">
+              <div class="match-circle-progress" id="modalMatchGauge" style="--match-pct: 88%;">
+                <div class="match-circle-inner">
+                  <span class="match-pct-number" id="modalMatchPercent">88%</span>
+                  <span class="match-pct-label">Match</span>
+                </div>
+              </div>
+            </div>
+            <div class="match-card-info">
+              <div class="match-badge-row">
+                <span class="match-status-badge level-high" id="modalMatchBadge">High Match</span>
+                <span class="match-hiring-odds" id="modalMatchOdds">Top 10% Interview Probability</span>
+              </div>
+              <h4 class="match-headline" id="modalMatchHeadline">Strong alignment with core requirements</h4>
+              <p class="match-subtext" id="modalMatchSubtext">Your background directly satisfies the primary technology stack and experience level.</p>
+            </div>
+          </div>
+
+          <!-- Matched vs Missing Skills Grid -->
+          <div class="match-skills-grid">
+            <div class="match-skills-col col-matched">
+              <div class="skills-col-header">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Matched Skills (<span id="modalMatchedCount">0</span>)</span>
+              </div>
+              <div class="skills-chips-wrap" id="modalMatchedSkills">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <div class="match-skills-col col-missing">
+              <div class="skills-col-header">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>Skill Gaps / Target Additions (<span id="modalMissingCount">0</span>)</span>
+              </div>
+              <div class="skills-chips-wrap" id="modalMissingSkills">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Optimization Advice Box -->
+          <div class="match-advice-box">
+            <div class="advice-icon-wrap">💡</div>
+            <div class="advice-content">
+              <strong>AI Application Tip:</strong>
+              <span id="modalMatchAdvice">Highlight your production TypeScript and system design achievements to maximize your interview conversion rate.</span>
+            </div>
+          </div>
+
+          <!-- Quick Edit Resume Button -->
+          <div class="match-action-row">
+            <button type="button" class="btn btn-sm btn-ghost" id="editResumeFromDrawerBtn">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>Update Resume Profile</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="quick-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Estimated Compensation</span>
+            <span class="stat-val highlight" id="modalSalary">$160,000 - $220,000 + Equity</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Source Platform</span>
+            <span class="stat-val" id="modalPlatform">Lever ATS (YC W20)</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Detected Via</span>
+            <span class="stat-val" id="modalDetected">TinyFish Agent API</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Job Category</span>
+            <span class="stat-val" id="modalCategory">Engineering & AI</span>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Required Technologies & Skills</h4>
+          <div class="tags-cloud" id="modalSkillsList">
+            <!-- Dynamic skills tags -->
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Role Overview & Responsibilities</h4>
+          <div class="markdown-preview" id="modalDescription">
+            <!-- Description snippet -->
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Original Listing URL</h4>
+          <a href="#" target="_blank" rel="noopener noreferrer" class="link-external" id="modalRawLink">
+            <span id="modalRawLinkText">https://jobs.lever.co/...</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modalSaveBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+          <span id="modalSaveText">Save Position</span>
+        </button>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-apply" id="modalApplyBtn">
+          <span>Apply Directly on Platform</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Settings Modal -->
+  <div class="modal-backdrop" id="settingsModalBackdrop" style="display: none;">
+    <div class="modal-content settings-dialog">
+      <div class="modal-header">
+        <div class="settings-header-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <h3>TinyFish API Configuration</h3>
+        </div>
+        <button class="btn-close" id="closeSettingsModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="settings-info-text">
+          Your key communicates with TinyFish endpoints: <code>https://api.search.tinyfish.ai</code> and <code>https://agent.tinyfish.ai</code> to crawl and extract jobs.
+        </p>
+
+        <div class="form-group">
+          <label for="tinyfishApiKey">TinyFish API Key</label>
+          <div class="key-input-row">
+            <input type="password" id="tinyfishApiKey" placeholder="sk-tinyfish-..." class="input-mono">
+            <button type="button" class="btn btn-ghost" id="toggleKeyVisibility">Show</button>
+          </div>
+          <span class="form-help">Stored locally in your browser storage. Never sent to third parties.</span>
+        </div>
+
+        <div class="form-group">
+          <label>Connection Routing</label>
+          <div class="radio-card-group">
+            <label class="radio-card">
+              <input type="radio" name="proxyMode" value="proxy" id="modeProxy" checked>
+              <div class="card-text">
+                <span class="card-title">Local Server Proxy (Recommended)</span>
+                <span class="card-desc">Routes via PowerShell or Python local server at <code>http://localhost:8080</code> for zero CORS issues.</span>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="proxyMode" value="direct" id="modeDirect">
+              <div class="card-text">
+                <span class="card-title">Direct Browser Fetch</span>
+                <span class="card-desc">Calls <code>api.search.tinyfish.ai</code> directly from client JS.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="proxyUrlInput">Local Server URL</label>
+          <input type="text" id="proxyUrlInput" value="http://localhost:8080" class="input-mono">
+        </div>
+
+        <div class="api-test-box">
+          <button type="button" class="btn btn-secondary" id="testApiConnectionBtn">
+            <span>Test API Connection</span>
+          </button>
+          <span class="test-result-indicator" id="testApiResult"></span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancelSettingsBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resume Matcher Management Modal -->
+  <div class="modal-backdrop" id="resumeModalBackdrop" style="display: none;">
+    <div class="modal-content resume-dialog">
+      <div class="modal-header">
+        <div class="resume-header-wrap">
+          <div class="resume-icon-badge">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div>
+            <h3>AI Resume Matcher & Hiring Probability</h3>
+            <p class="modal-subtitle">Upload or paste your resume to calculate personalized match percentages and interview odds for every job posting.</p>
+          </div>
+        </div>
+        <button class="btn-close" id="closeResumeModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Sample Presets for 1-Click Testing -->
+        <div class="resume-presets-bar">
+          <span class="preset-label">Quick Presets:</span>
+          <button type="button" class="chip-preset active" data-preset="fullstack">Full Stack Engineer</button>
+          <button type="button" class="chip-preset" data-preset="ai_engineer">AI/ML Engineer</button>
+          <button type="button" class="chip-preset" data-preset="designer">Product Designer</button>
+          <button type="button" class="chip-preset" data-preset="clear">Clear</button>
+        </div>
+
+        <!-- File Upload / Drop Area -->
+        <div class="resume-dropzone" id="resumeDropzone">
+          <input type="file" id="resumeFileInput" accept=".txt,.pdf,.docx" style="display: none;">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <div class="dropzone-text">
+            <span><strong>Click to upload</strong> or drag and drop your resume file (.txt, .pdf, .docx)</span>
+            <span class="dropzone-sub">Parsed 100% locally in your browser. Stored only in private localStorage.</span>
+          </div>
+        </div>
+
+        <!-- Resume Textarea -->
+        <div class="form-group">
+          <div class="textarea-header">
+            <label for="resumeTextInput">Resume Text & Experience</label>
+            <span class="char-count" id="resumeWordCount">0 words</span>
+          </div>
+          <textarea id="resumeTextInput" class="resume-textarea" rows="5" placeholder="Paste your resume content, experience, skills, and past roles here..."></textarea>
+        </div>
+
+        <!-- Real-time Detected Skills -->
+        <div class="form-group">
+          <label>Detected Skills & Competencies (<span id="detectedSkillsCount">0</span>)</label>
+          <div class="detected-skills-cloud" id="detectedSkillsCloud">
+            <span class="skill-placeholder">Type or paste your resume above to preview detected skills...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancelResumeBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveResumeBtn">Save & Calculate Matches</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
